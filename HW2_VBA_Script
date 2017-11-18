@@ -1,0 +1,125 @@
+Sub stock_check()
+
+'Variable decleration
+
+Dim LastRow As Long
+Dim Tot_vol As Double
+Dim J As Integer
+Dim Open_amt As Double
+Dim Close_amt As Double
+Dim Greatest_Inc As Double
+Dim Greatest_Dec As Double
+Dim Gretaest_Vol As Double
+Dim Yearly_change As Double
+Dim currentYear As Date
+ Dim ws As Object
+ 
+        
+
+'Defaulting the variables
+Greatest_Inc = 0
+Gretaest_dec = 1
+Greatest_vol = 0
+
+' get the total number of rows in the data set
+Count1 = Cells(Rows.Count, 1).End(xlUp).Row - 1
+
+'Initilizing the variable
+Tot_vol = 0
+
+
+'Runing the macro through each sheet in the workbook
+ For Each ws In ActiveWorkbook.Sheets
+ 
+ 
+' Determine the data set
+LastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+ 
+ 'Defaulting  variables for each work sheet
+ 
+ J = 2
+Greatest_Inc = 0
+Gretaest_dec = 0
+Greatest_vol = 0
+
+
+For i = 2 To LastRow
+       If (ws.Cells(i, 1).Value = ws.Cells(i + 1, 1).Value) Then
+                    If (Right(ws.Cells(i, 2).Value, 4) = "0101") Then
+                                Open_amt = ws.Cells(i, 3).Value
+                    End If
+                    'calculating the total_volume for a scrip
+        Tot_vol = Tot_vol + ws.Cells(i, 7).Value
+       Else
+       'Writing data to excel
+        ws.Cells(J, 9) = ws.Cells(i, 1).Value
+            'Documenting the total volume
+            ws.Cells(J, 10).Value = Tot_vol
+            
+                 'Adding the closing amt to the resulting excel
+                 Close_amt = ws.Cells(i, 3).Value
+                 ws.Cells(J, 11).Value = Close_amt
+                 
+                       'Adding opening amt to excel.
+                        ws.Cells(J, 12).Value = Open_amt
+                        
+                                  'Calculating the yearly change
+                                    ws.Cells(J, 13).Value = Close_amt - Open_amt
+                                    Yearly_change = ws.Cells(J, 13).Value
+                                    
+                            'Calculating the percantage change
+                            If Open_amt <> 0 And Close_amt <> 0 Then
+                                    ws.Cells(J, 14).Value = (Open_amt / Close_amt)
+                                    
+                            End If
+                            
+        'Setting the color to the cell as per the criteria
+        If ws.Cells(J, 13).Value > 0 Then
+                ws.Cells(J, 14).Interior.ColorIndex = 4
+         Else
+                ws.Cells(J, 14).Interior.ColorIndex = 3
+         End If
+         
+             'Finding the greatest volume
+                         If Tot_vol > Greatest_vol Then
+                                Greatest_vol = Tot_vol
+                                Ticker_GV = ws.Cells(i, 1).Value
+                        End If
+                        
+            'Finding the greatest Inc
+             If Yearly_change > Greatest_Inc Then
+                Greatest_Inc = Yearly_change
+                Ticker_inc = ws.Cells(i, 1).Value
+             End If
+             
+             'Finding the greatest dec
+             If Yearly_change < Greatest_Dec Then
+                Greatest_Dec = Yearly_change
+                Ticker_dec = ws.Cells(i, 1).Value
+             End If
+             J = J + 1
+     End If
+  Next i
+ 
+             'Writing the summary values to the excel
+             ws.Cells(2, 17).Value = "Ticker"
+             ws.Cells(2, 18).Value = "Value"
+             
+             ws.Cells(3, 16).Value = "Greatest % Increase"
+             ws.Cells(3, 17).Value = Ticker_inc
+             ws.Cells(3, 18).Value = Greatest_Inc
+             
+                                ws.Cells(4, 16).Value = "Greatest % Decrease"
+                                ws.Cells(4, 17).Value = Ticker_dec
+                                ws.Cells(4, 18).Value = Greatest_Dec
+                                
+              ws.Cells(5, 16).Value = "Greatest Volume"
+              ws.Cells(5, 17).Value = Ticker_GV
+              ws.Cells(5, 18).Value = Greatest_vol
+              
+'Defualting varibles
+  Ticker_dec = 0
+  Greatest_Dec = 0
+  
+ Next ws
+End Sub
